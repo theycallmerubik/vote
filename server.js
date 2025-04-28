@@ -11,8 +11,12 @@ app.use(express.static('public'));
 
 // PostgreSQL connection
 const pool = new Pool({
-  connectionString: 'DATABASE_URL=postgresql://postgres:[1383He1383@]@db.aeqklddnsfygkoiqfohx.supabase.co:5432/postgres',
-  ssl: { rejectUnauthorized: false } // Important for Railway / Supabase
+  user: 'postgres.aeqklddnsfygkoiqfohx',
+  host: 'aws-0-eu-central-1.pooler.supabase.com',
+  database: 'postgres',
+  password: '1383He1383@',
+  port: 6543,
+  ssl: { rejectUnauthorized: false }
 });
 
 app.post('/vote', async (req, res) => {
