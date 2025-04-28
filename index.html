@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Poll</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#4F46E5", secondary: "#A5B4FC" },
+            borderRadius: {
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      body { font-family: 'Inter', sans-serif; }
+      .option-button { transition: all 0.2s ease; }
+      .option-button:hover { transform: translateY(-2px); }
+      .option-button.selected { border-color: #4F46E5; background-color: rgba(79, 70, 229, 0.1); }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div class="fixed w-full top-0 bg-white shadow-sm z-10">
+      <div class="flex items-center justify-between px-4 py-3">
+        <div class="text-xl font-['Pacifico'] text-primary">logo</div>
+      </div>
+    </div>
+
+    <div class="pt-16 pb-20 px-6 max-w-md mx-auto">
+      <div class="mt-8 mb-12 text-center">
+        <h1 class="text-2xl font-semibold text-gray-800 mb-2">Which design direction should we pursue?</h1>
+        <p class="text-gray-500 text-sm">Your feedback will help shape our next product iteration</p>
+      </div>
+
+      <div class="space-y-4 mb-8" id="poll-options">
+        <button class="option-button w-full p-4 bg-white border border-gray-200 rounded-button text-left shadow-sm cursor-pointer hover:shadow-md" data-option="1">
+          <div class="flex items-center">
+            <div class="w-6 h-6 flex items-center justify-center mr-3 border border-gray-300 rounded-full" id="radio-1">
+              <div class="w-3 h-3 rounded-full hidden bg-primary" id="radio-fill-1"></div>
+            </div>
+            <div><h3 class="font-medium text-gray-800">I Agree</h3></div>
+          </div>
+        </button>
+        <button class="option-button w-full p-4 bg-white border border-gray-200 rounded-button text-left shadow-sm cursor-pointer hover:shadow-md" data-option="2">
+          <div class="flex items-center">
+            <div class="w-6 h-6 flex items-center justify-center mr-3 border border-gray-300 rounded-full" id="radio-2">
+              <div class="w-3 h-3 rounded-full hidden bg-primary" id="radio-fill-2"></div>
+            </div>
+            <div><h3 class="font-medium text-gray-800">I Disagree</h3></div>
+          </div>
+        </button>
+      </div>
+
+      <button id="submit-vote" class="w-full py-3 bg-primary text-white font-medium rounded-button shadow-sm cursor-pointer hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+        Submit Vote
+      </button>
+
+      <div class="mt-8 p-4 bg-gray-100 rounded-md text-center text-sm text-gray-600">
+        Your vote is anonymous. Poll closes on May 10, 2025.
+      </div>
+    </div>
+
+    <div id="thank-you-dialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 hidden">
+      <div class="bg-white rounded-lg p-6 w-5/6 max-w-sm shadow-xl text-center">
+        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+          <i class="ri-check-line ri-2x text-green-500"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">Thank You!</h3>
+        <p class="text-gray-600 mb-6">Your vote has been recorded successfully!</p>
+        <button id="close-dialog" class="w-full py-2 bg-primary text-white font-medium rounded-button hover:bg-primary/90 transition-colors">
+          Close
+        </button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const options = document.querySelectorAll(".option-button");
+        const submitButton = document.getElementById("submit-vote");
+        const thankYouDialog = document.getElementById("thank-you-dialog");
+        const closeDialogButton = document.getElementById("close-dialog");
+        let selectedOption = null;
+
+        options.forEach(option => {
+          option.addEventListener("click", function () {
+            const optionId = this.getAttribute("data-option");
+            options.forEach(opt => {
+              opt.classList.remove("selected");
+              document.getElementById(`radio-fill-${opt.getAttribute("data-option")}`).classList.add("hidden");
+            });
+            this.classList.add("selected");
+            document.getElementById(`radio-fill-${optionId}`).classList.remove("hidden");
+            selectedOption = optionId;
+            submitButton.disabled = false;
+          });
+        });
+
+        submitButton.addEventListener("click", function () {
+          if (selectedOption) {
+            fetch('/vote', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ option: selectedOption })
+            })
+            .then(response => response.json())
+            .then(data => {
+              console.log('Vote recorded:', data);
+              thankYouDialog.classList.remove("hidden");
+              options.forEach(opt => {
+                opt.disabled = true;
+                opt.classList.add("opacity-50");
+              });
+              submitButton.disabled = true;
+            })
+            .catch(error => {
+              console.error('Error submitting vote:', error);
+            });
+          }
+        });
+
+        closeDialogButton.addEventListener("click", function () {
+          thankYouDialog.classList.add("hidden");
+        });
+
+        submitButton.disabled = true;
+      });
+    </script>
+  </body>
+</html>
