@@ -11,7 +11,7 @@ app.use(express.static('public'));
 
 // PostgreSQL connection
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: 'DATABASE_URL=postgresql://postgres:[1383He1383@]@db.aeqklddnsfygkoiqfohx.supabase.co:5432/postgres',
   ssl: { rejectUnauthorized: false } // Important for Railway / Supabase
 });
 
